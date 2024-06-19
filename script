@@ -9,7 +9,7 @@ function doPost(req) {
 
   // Accessing spreadsheet data
   var doc = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = doc.getSheetByName('Dados');
+  var sheet = doc.getSheetByName('Bot');
   var values = sheet.getDataRange().getValues();
 
   // Filtering data based on the request
