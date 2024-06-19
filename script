@@ -1,6 +1,6 @@
 function doPost(req) {
   // Parsing request data
-  var provider_id = 'NzUoVK8wvYshZmk';
+  var provider_id = 'PASTE_YOUR_PROVIDER_ID_HERE';
   var data = JSON.parse(req.postData.contents);
   var pedido = data.message.text;
   var id = data.id;
