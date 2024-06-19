@@ -1,0 +1,84 @@
+function doPost(req) {
+  // Parsing request data
+  var provider_id = 'NzUoVK8wvYshZmk';
+  var data = JSON.parse(req.postData.contents);
+  var pedido = data.message.text;
+  var id = data.id;
+  var chat_id = data.chat_id;
+  var client_id = data.client_id;
+
+  // Accessing spreadsheet data
+  var doc = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = doc.getSheetByName('Dados');
+  var values = sheet.getDataRange().getValues();
+
+  // Filtering data based on the request
+  var filteredData = values.filter(row => row[0] == pedido);
+  var botMsg = filteredData.length > 0 ? filteredData[0][2] : false;
+  var postData;
+
+  // Function to create button objects from a comma-separated string
+  function createButtonObjects(str) {
+    return str.split(',').map((item, index) => ({
+      text: item.trim().charAt(0).toUpperCase() + item.trim().slice(1),
+      id: index + 1
+    }));
+  }
+
+  if (pedido == values[2][0]) {
+    postData = {
+      "id": id,
+      "client_id": client_id,
+      "chat_id": chat_id,
+      "event": "INVITE_AGENT"
+    };
+  } else if (botMsg === false) {
+    let resp = values[1][3];
+    let resps = createButtonObjects(resp);
+    postData = {
+      "id": id,
+      "client_id": client_id,
+      "chat_id": chat_id,
+      "message": {
+        "type": "BUTTONS",
+        "title": values[1][2],
+        "text": values[1][2],
+        "timestamp": Date.now(),
+        "force_reply": true,
+        "buttons": resps
+      },
+      "event": "BOT_MESSAGE"
+    };
+  } else {
+    let str = filteredData[0][3];
+    let result = createButtonObjects(str);
+    postData = {
+      "id": id,
+      "client_id": client_id,
+      "chat_id": chat_id,
+      "message": {
+        "type": "BUTTONS",
+        "title": botMsg,
+        "text": botMsg,
+        "timestamp": Date.now(),
+        "force_reply": true,
+        "buttons": result
+      },
+      "event": "BOT_MESSAGE"
+    };
+  }
+
+  // URL of the request
+  const url = `https://bot.jivosite.com/webhooks/${provider_id}/exec`;
+
+  // Making the POST request using UrlFetchApp
+  var options = {
+    'method': 'post',
+    'contentType': 'application/json',
+    'payload': JSON.stringify(postData)
+  };
+  var response = UrlFetchApp.fetch(url, options);
+
+  // Returning the response
+  return ContentService.createTextOutput(JSON.stringify(postData)).setMimeType(ContentService.MimeType.JSON);
+}
