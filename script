@@ -1,6 +1,5 @@
 function doPost(req) {
   // Parsing request data
-  var provider_id = 'PASTE_YOUR_PROVIDER_ID_HERE';
   var data = JSON.parse(req.postData.contents);
   var pedido = data.message.text;
   var id = data.id;
@@ -11,6 +10,7 @@ function doPost(req) {
   var doc = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = doc.getSheetByName('Bot');
   var values = sheet.getDataRange().getValues();
+  var provider_id = values[0][1];
 
   // Filtering data based on the request
   var filteredData = values.filter(row => row[0] == pedido);
